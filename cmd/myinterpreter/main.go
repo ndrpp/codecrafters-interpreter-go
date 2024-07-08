@@ -30,16 +30,21 @@ func main() {
 	hadScanErrors := false
 	line := 0
 	if len(fileContents) > 0 {
+	loop:
 		for i := 0; i < len(fileContents); i++ {
 			var tok token.Token
 			v := fileContents[i]
 
 			switch v {
 			case ' ':
+				continue loop
 			case '\r':
+				continue loop
 			case '\t':
+				continue loop
 			case '\n':
 				line++
+				continue loop
 			case '(':
 				tok = newToken(token.LPAREN, v)
 			case ')':
@@ -104,24 +109,18 @@ func main() {
 							i++
 						}
 					}
-					tok = token.Token{Type: token.COMMENT, Literal: string(v) + string(next)}
+					continue loop
 				} else {
 					tok = newToken(token.SLASH, v)
 				}
 
 			default:
-				tok = newToken(token.UNEXPECTED, v)
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line+1, string(v))
+				hadScanErrors = true
+				continue loop
 			}
 
-			if tok.Type == token.COMMENT {
-				continue
-			}
-			if tok.Type != token.UNEXPECTED {
-				fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
-			} else {
-				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line + 1, tok.Literal)
-				hadScanErrors = true
-			}
+			fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
 		}
 	}
 	fmt.Println("EOF  null")

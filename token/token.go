@@ -10,8 +10,7 @@ type Token struct {
 }
 
 const (
-	EOF        = "EOF"
-	UNEXPECTED = "UNEXPECTED"
+	EOF = "EOF"
 
 	LPAREN = "LEFT_PAREN"
 	RPAREN = "RIGHT_PAREN"
@@ -27,8 +26,6 @@ const (
 	SEMICOLON = "SEMICOLON"
 	ASSIGN    = "EQUAL"
 	BANG      = "BANG"
-
-	COMMENT = "COMMENT"
 
 	EQ     = "EQUAL_EQUAL"
 	NOT_EQ = "BANG_EQUAL"
