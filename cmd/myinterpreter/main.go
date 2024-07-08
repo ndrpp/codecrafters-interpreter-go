@@ -7,12 +7,6 @@ import (
 	"github.com/codecrafters-io/interpreter-starter-go/token"
 )
 
-type Scanner struct {
-	start   uint16
-	current uint16
-	line    uint16
-}
-
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
@@ -34,12 +28,18 @@ func main() {
 	}
 
 	hadScanErrors := false
+	line := 0
 	if len(fileContents) > 0 {
 		for i := 0; i < len(fileContents); i++ {
 			var tok token.Token
 			v := fileContents[i]
 
 			switch v {
+			case ' ':
+			case '\r':
+			case '\t':
+			case '\n':
+				line++
 			case '(':
 				tok = newToken(token.LPAREN, v)
 			case ')':
@@ -64,7 +64,7 @@ func main() {
 				next := peekNextToken(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.EQ, Literal: string(v) + string(next)}
-					i += 1
+					i++
 				} else {
 					tok = newToken(token.ASSIGN, v)
 				}
@@ -72,7 +72,7 @@ func main() {
 				next := peekNextToken(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.NOT_EQ, Literal: string(v) + string(next)}
-					i += 1
+					i++
 				} else {
 					tok = newToken(token.BANG, v)
 				}
@@ -80,7 +80,7 @@ func main() {
 				next := peekNextToken(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.GT_OR_EQ, Literal: string(v) + string(next)}
-					i += 1
+					i++
 				} else {
 					tok = newToken(token.GT, v)
 				}
@@ -88,19 +88,38 @@ func main() {
 				next := peekNextToken(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.LT_OR_EQ, Literal: string(v) + string(next)}
-					i += 1
+					i++
 				} else {
 					tok = newToken(token.LT, v)
+				}
+			case '/':
+				next := peekNextToken(i, fileContents)
+				if next == '/' {
+					i++
+					for {
+						ch := peekNextToken(i, fileContents)
+						if ch == '\n' || i+1 == len(fileContents) {
+							break
+						} else {
+							i++
+						}
+					}
+					tok = token.Token{Type: token.COMMENT, Literal: string(v) + string(next)}
+				} else {
+					tok = newToken(token.SLASH, v)
 				}
 
 			default:
 				tok = newToken(token.UNEXPECTED, v)
 			}
 
+			if tok.Type == token.COMMENT {
+				continue
+			}
 			if tok.Type != token.UNEXPECTED {
 				fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
 			} else {
-				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", 1, tok.Literal)
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line + 1, tok.Literal)
 				hadScanErrors = true
 			}
 		}

@@ -21,11 +21,14 @@ const (
 	PLUS      = "PLUS"
 	MINUS     = "MINUS"
 	ASTERISK  = "STAR"
+	SLASH     = "SLASH"
 	COMMA     = "COMMA"
 	DOT       = "DOT"
 	SEMICOLON = "SEMICOLON"
 	ASSIGN    = "EQUAL"
 	BANG      = "BANG"
+
+	COMMENT = "COMMENT"
 
 	EQ     = "EQUAL_EQUAL"
 	NOT_EQ = "BANG_EQUAL"
