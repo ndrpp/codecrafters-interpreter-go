@@ -33,13 +33,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	hadScanErrors := false
 	if len(fileContents) > 0 {
 		for _, v := range fileContents {
-			token := scanToken(v)
-			fmt.Printf("%s %s null\n", token.Type, token.Literal)
+			tok := scanToken(v)
+			if tok.Type != token.UNEXPECTED {
+				fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
+			} else {
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", 1, tok.Literal)
+				hadScanErrors = true
+			}
 		}
 	}
 	fmt.Println("EOF  null")
+	if hadScanErrors {
+		os.Exit(65)
+	}
 }
 
 func scanToken(t byte) token.Token {
@@ -67,9 +76,8 @@ func scanToken(t byte) token.Token {
 	case ';':
 		tok = newToken(token.SEMICOLON, t)
 
-	case 0:
-		tok.Literal = ""
-		tok.Type = token.EOF
+	default:
+		tok = newToken(token.UNEXPECTED, t)
 	}
 
 	return tok

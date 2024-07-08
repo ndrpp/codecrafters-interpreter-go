@@ -10,7 +10,8 @@ type Token struct {
 }
 
 const (
-	EOF = "EOF"
+	EOF        = "EOF"
+	UNEXPECTED = "UNEXPECTED"
 
 	LPAREN = "LEFT_PAREN"
 	RPAREN = "RIGHT_PAREN"
