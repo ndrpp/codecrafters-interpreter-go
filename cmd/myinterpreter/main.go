@@ -35,8 +35,43 @@ func main() {
 
 	hadScanErrors := false
 	if len(fileContents) > 0 {
-		for _, v := range fileContents {
-			tok := scanToken(v)
+		for i := 0; i < len(fileContents); i++ {
+			var tok token.Token
+			v := fileContents[i]
+
+			switch v {
+			case '(':
+				tok = newToken(token.LPAREN, v)
+			case ')':
+				tok = newToken(token.RPAREN, v)
+			case '}':
+				tok = newToken(token.RBRACE, v)
+			case '{':
+				tok = newToken(token.LBRACE, v)
+			case '+':
+				tok = newToken(token.PLUS, v)
+			case '-':
+				tok = newToken(token.MINUS, v)
+			case '*':
+				tok = newToken(token.ASTERISK, v)
+			case ',':
+				tok = newToken(token.COMMA, v)
+			case '.':
+				tok = newToken(token.DOT, v)
+			case ';':
+				tok = newToken(token.SEMICOLON, v)
+			case '=':
+				if i+1 < len(fileContents) && fileContents[i+1] == '=' {
+                    tok = token.Token{Type: token.EQ, Literal: string(v) + string(fileContents[i+1])}
+					i += 1
+				} else {
+					tok = newToken(token.ASSIGN, v)
+				}
+
+			default:
+				tok = newToken(token.UNEXPECTED, v)
+			}
+
 			if tok.Type != token.UNEXPECTED {
 				fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
 			} else {
@@ -46,41 +81,10 @@ func main() {
 		}
 	}
 	fmt.Println("EOF  null")
+
 	if hadScanErrors {
 		os.Exit(65)
 	}
-}
-
-func scanToken(t byte) token.Token {
-	var tok token.Token
-
-	switch t {
-	case '(':
-		tok = newToken(token.LPAREN, t)
-	case ')':
-		tok = newToken(token.RPAREN, t)
-	case '}':
-		tok = newToken(token.RBRACE, t)
-	case '{':
-		tok = newToken(token.LBRACE, t)
-	case '+':
-		tok = newToken(token.PLUS, t)
-	case '-':
-		tok = newToken(token.MINUS, t)
-	case '*':
-		tok = newToken(token.ASTERISK, t)
-	case ',':
-		tok = newToken(token.COMMA, t)
-	case '.':
-		tok = newToken(token.DOT, t)
-	case ';':
-		tok = newToken(token.SEMICOLON, t)
-
-	default:
-		tok = newToken(token.UNEXPECTED, t)
-	}
-
-	return tok
 }
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {

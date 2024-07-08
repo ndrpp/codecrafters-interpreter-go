@@ -24,4 +24,7 @@ const (
 	COMMA     = "COMMA"
 	DOT       = "DOT"
 	SEMICOLON = "SEMICOLON"
+	ASSIGN    = "EQUAL"
+
+	EQ = "EQUAL_EQUAL"
 )
