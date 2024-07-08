@@ -12,6 +12,8 @@ type Token struct {
 const (
 	EOF = "EOF"
 
+	STRING = "STRING"
+
 	LPAREN = "LEFT_PAREN"
 	RPAREN = "RIGHT_PAREN"
 	LBRACE = "LEFT_BRACE"

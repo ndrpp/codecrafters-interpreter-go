@@ -113,6 +113,27 @@ func main() {
 				} else {
 					tok = newToken(token.SLASH, v)
 				}
+			case '"':
+				init := i
+				for {
+					ch := peekNextToken(i, fileContents)
+					if ch == '\n' || ch == '"' || ch == 0 {
+						break
+					} else {
+						i++
+					}
+				}
+				if i+1 == len(fileContents) {
+					fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n", line+1)
+					hadScanErrors = true
+					continue loop
+				}
+				tok.Type = token.STRING
+				tok.Literal = string(fileContents[init : i+2])
+				tok.Text = string(fileContents[init+1 : i+1])
+				fmt.Printf("%s %s %s\n", tok.Type, tok.Literal, tok.Text)
+				i++
+				continue loop
 
 			default:
 				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line+1, string(v))
