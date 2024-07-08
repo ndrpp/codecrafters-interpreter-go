@@ -138,7 +138,12 @@ func main() {
 				continue loop
 
 			default:
-				if isDigit(v) {
+				if isLetter(v) {
+					id, step := readIdentifier(i, fileContents)
+					tok.Literal = id
+					tok.Type = token.LookupIdent(tok.Literal)
+					i += step
+				} else if isDigit(v) {
 					tok, step := lexNumber(i, fileContents)
 					fmt.Printf("%s %s %s\n", tok.Type, strings.TrimSuffix(tok.Literal, "\x00"), strings.TrimSuffix(tok.Text, "\x00"))
 					i += step
@@ -160,6 +165,16 @@ func main() {
 	}
 }
 
+func readIdentifier(i int, fileContents []byte) (string, int) {
+	position := i
+
+	for isLetter(peek(i, fileContents)) || isDigit(peek(i, fileContents)) {
+		i++
+	}
+
+	return string(fileContents[position : i+1]), i - position
+}
+
 func lexNumber(i int, fileContents []byte) (token.Token, int) {
 	var tok token.Token
 	init := i
@@ -178,14 +193,21 @@ func lexNumber(i int, fileContents []byte) (token.Token, int) {
 
 	floatVal, _ := strconv.ParseFloat(string(fileContents[init:i+1]), 64)
 	if !hasDot {
-		tok.Text = strconv.FormatFloat(floatVal, 'f', 1, 64)
+		tok.Text = fmt.Sprintf("%.1f", floatVal)
 	} else {
-		tok.Text = strconv.FormatFloat(floatVal, 'f', -1, 64)
+		tok.Text = fmt.Sprintf("%g", floatVal)
+		if floatVal == float64(int(floatVal)) {
+			tok.Text = fmt.Sprintf("%.1f", floatVal)
+		}
 	}
 	tok.Type = token.NUMBER
 	tok.Literal = string(fileContents[init : i+1])
 
 	return tok, i - init
+}
+
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
 func peek(i int, fileContents []byte) byte {
