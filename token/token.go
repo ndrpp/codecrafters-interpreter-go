@@ -25,6 +25,8 @@ const (
 	DOT       = "DOT"
 	SEMICOLON = "SEMICOLON"
 	ASSIGN    = "EQUAL"
+	BANG      = "BANG"
 
-	EQ = "EQUAL_EQUAL"
+	EQ     = "EQUAL_EQUAL"
+	NOT_EQ = "BANG_EQUAL"
 )

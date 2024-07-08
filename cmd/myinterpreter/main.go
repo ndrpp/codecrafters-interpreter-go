@@ -61,11 +61,20 @@ func main() {
 			case ';':
 				tok = newToken(token.SEMICOLON, v)
 			case '=':
-				if i+1 < len(fileContents) && fileContents[i+1] == '=' {
-                    tok = token.Token{Type: token.EQ, Literal: string(v) + string(fileContents[i+1])}
+				next := peekNextToken(i, fileContents)
+				if next == '=' {
+					tok = token.Token{Type: token.EQ, Literal: string(v) + string(next)}
 					i += 1
 				} else {
 					tok = newToken(token.ASSIGN, v)
+				}
+			case '!':
+				next := peekNextToken(i, fileContents)
+				if next == '=' {
+					tok = token.Token{Type: token.NOT_EQ, Literal: string(v) + string(next)}
+					i += 1
+				} else {
+					tok = newToken(token.BANG, v)
 				}
 
 			default:
@@ -85,6 +94,13 @@ func main() {
 	if hadScanErrors {
 		os.Exit(65)
 	}
+}
+
+func peekNextToken(i int, fileContents []byte) byte {
+	if i+1 < len(fileContents) {
+		return fileContents[i+1]
+	}
+	return 0
 }
 
 func newToken(tokenType token.TokenType, ch byte) token.Token {
