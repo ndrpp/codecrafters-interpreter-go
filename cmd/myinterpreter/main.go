@@ -76,6 +76,22 @@ func main() {
 				} else {
 					tok = newToken(token.BANG, v)
 				}
+			case '>':
+				next := peekNextToken(i, fileContents)
+				if next == '=' {
+					tok = token.Token{Type: token.GT_OR_EQ, Literal: string(v) + string(next)}
+					i += 1
+				} else {
+					tok = newToken(token.GT, v)
+				}
+			case '<':
+				next := peekNextToken(i, fileContents)
+				if next == '=' {
+					tok = token.Token{Type: token.LT_OR_EQ, Literal: string(v) + string(next)}
+					i += 1
+				} else {
+					tok = newToken(token.LT, v)
+				}
 
 			default:
 				tok = newToken(token.UNEXPECTED, v)

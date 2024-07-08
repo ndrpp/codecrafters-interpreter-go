@@ -29,4 +29,9 @@ const (
 
 	EQ     = "EQUAL_EQUAL"
 	NOT_EQ = "BANG_EQUAL"
+
+	LT       = "LESS"
+	GT       = "GREATER"
+	LT_OR_EQ = "LESS_EQUAL"
+	GT_OR_EQ = "GREATER_EQUAL"
 )
