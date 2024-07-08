@@ -50,6 +50,23 @@ func scanToken(t byte) token.Token {
 		tok = newToken(token.LPAREN, t)
 	case ')':
 		tok = newToken(token.RPAREN, t)
+	case '}':
+		tok = newToken(token.RBRACE, t)
+	case '{':
+		tok = newToken(token.LBRACE, t)
+	case '+':
+		tok = newToken(token.PLUS, t)
+	case '-':
+		tok = newToken(token.MINUS, t)
+	case '*':
+		tok = newToken(token.ASTERISK, t)
+	case ',':
+		tok = newToken(token.COMMA, t)
+	case '.':
+		tok = newToken(token.DOT, t)
+	case ';':
+		tok = newToken(token.SEMICOLON, t)
+
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
