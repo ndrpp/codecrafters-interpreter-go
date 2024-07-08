@@ -3,7 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/codecrafters-io/interpreter-starter-go/token"
 )
+
+type Scanner struct {
+	start   uint16
+	current uint16
+	line    uint16
+}
 
 func main() {
 	if len(os.Args) < 3 {
@@ -26,8 +34,30 @@ func main() {
 	}
 
 	if len(fileContents) > 0 {
-		panic("Scanner not implemented")
-	} else {
-		fmt.Println("EOF  null")
+		for _, v := range fileContents {
+			token := scanToken(v)
+			fmt.Printf("%s %s null\n", token.Type, token.Literal)
+		}
 	}
+	fmt.Println("EOF  null")
+}
+
+func scanToken(t byte) token.Token {
+	var tok token.Token
+
+	switch t {
+	case '(':
+		tok = newToken(token.LPAREN, t)
+	case ')':
+		tok = newToken(token.RPAREN, t)
+	case 0:
+		tok.Literal = ""
+		tok.Type = token.EOF
+	}
+
+	return tok
+}
+
+func newToken(tokenType token.TokenType, ch byte) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch)}
 }
