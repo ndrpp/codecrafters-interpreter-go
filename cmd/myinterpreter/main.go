@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/codecrafters-io/interpreter-starter-go/token"
 )
@@ -66,7 +68,7 @@ func main() {
 			case ';':
 				tok = newToken(token.SEMICOLON, v)
 			case '=':
-				next := peekNextToken(i, fileContents)
+				next := peek(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.EQ, Literal: string(v) + string(next)}
 					i++
@@ -74,7 +76,7 @@ func main() {
 					tok = newToken(token.ASSIGN, v)
 				}
 			case '!':
-				next := peekNextToken(i, fileContents)
+				next := peek(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.NOT_EQ, Literal: string(v) + string(next)}
 					i++
@@ -82,7 +84,7 @@ func main() {
 					tok = newToken(token.BANG, v)
 				}
 			case '>':
-				next := peekNextToken(i, fileContents)
+				next := peek(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.GT_OR_EQ, Literal: string(v) + string(next)}
 					i++
@@ -90,7 +92,7 @@ func main() {
 					tok = newToken(token.GT, v)
 				}
 			case '<':
-				next := peekNextToken(i, fileContents)
+				next := peek(i, fileContents)
 				if next == '=' {
 					tok = token.Token{Type: token.LT_OR_EQ, Literal: string(v) + string(next)}
 					i++
@@ -98,11 +100,11 @@ func main() {
 					tok = newToken(token.LT, v)
 				}
 			case '/':
-				next := peekNextToken(i, fileContents)
+				next := peek(i, fileContents)
 				if next == '/' {
 					i++
 					for {
-						ch := peekNextToken(i, fileContents)
+						ch := peek(i, fileContents)
 						if ch == '\n' || i+1 == len(fileContents) {
 							break
 						} else {
@@ -116,7 +118,7 @@ func main() {
 			case '"':
 				init := i
 				for {
-					ch := peekNextToken(i, fileContents)
+					ch := peek(i, fileContents)
 					if ch == '\n' || ch == '"' || ch == 0 {
 						break
 					} else {
@@ -136,9 +138,16 @@ func main() {
 				continue loop
 
 			default:
-				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line+1, string(v))
-				hadScanErrors = true
-				continue loop
+				if isDigit(v) {
+					tok, step := lexNumber(i, fileContents)
+					fmt.Printf("%s %s %s\n", tok.Type, strings.TrimSuffix(tok.Literal, "\x00"), strings.TrimSuffix(tok.Text, "\x00"))
+					i += step
+					continue loop
+				} else {
+					fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line+1, string(v))
+					hadScanErrors = true
+					continue loop
+				}
 			}
 
 			fmt.Printf("%s %s null\n", tok.Type, tok.Literal)
@@ -151,13 +160,52 @@ func main() {
 	}
 }
 
-func peekNextToken(i int, fileContents []byte) byte {
+func lexNumber(i int, fileContents []byte) (token.Token, int) {
+	var tok token.Token
+	init := i
+	hasDot := false
+	for isDigit(peek(i, fileContents)) {
+		i++
+	}
+
+	if peek(i, fileContents) == '.' && isDigit(peekNext(i, fileContents)) {
+		i++
+		hasDot = true
+		for isDigit(peek(i, fileContents)) {
+			i++
+		}
+	}
+
+	floatVal, _ := strconv.ParseFloat(string(fileContents[init:i+1]), 64)
+	if !hasDot {
+		tok.Text = strconv.FormatFloat(floatVal, 'f', 1, 64)
+	} else {
+		tok.Text = strconv.FormatFloat(floatVal, 'f', -1, 64)
+	}
+	tok.Type = token.NUMBER
+	tok.Literal = string(fileContents[init : i+1])
+
+	return tok, i - init
+}
+
+func peek(i int, fileContents []byte) byte {
 	if i+1 < len(fileContents) {
 		return fileContents[i+1]
 	}
 	return 0
 }
 
+func peekNext(i int, fileContents []byte) byte {
+	if i+2 < len(fileContents) {
+		return fileContents[i+2]
+	}
+	return 0
+}
+
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
 }
